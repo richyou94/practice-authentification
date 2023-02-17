@@ -4,6 +4,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const ejs = require("ejs");
 const mongoose = require("mongoose");
+const encrypt = require("mongoose-encryption");
 
 const app = express();
 
@@ -14,10 +15,10 @@ app.use(express.static("public"));
 
 mongoose.connect("mongodb://localhost:27017/userDB", { useNewUrlParser: true });
 
-const userSchema = {
+const userSchema = new mongoose.Schema({
   email: String,
   password: String,
-};
+});
 
 const User = new mongoose.model("User", userSchema);
 
@@ -36,7 +37,7 @@ app.get("/register", function (req, res) {
 app.post("/register", function (req, res) {
   const email = req.body.username;
   const password = req.body.password;
-console.log(email, password);
+  console.log(email, password);
   const newUser = new User({
     email: email,
     password: password,
@@ -54,7 +55,7 @@ console.log(email, password);
 app.post("/login", function (req, res) {
   const username = req.body.username;
   const password = req.body.password;
-console.log(username, password);
+  console.log(username, password);
   User.findOne({ email: username }, function (err, foundUser) {
     if (err) {
       console.log(err);
