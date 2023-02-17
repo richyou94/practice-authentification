@@ -15,14 +15,8 @@ app.use(express.static("public"));
 mongoose.connect("mongodb://localhost:27017/userDB", { useNewUrlParser: true });
 
 const userSchema = {
-  email: {
-    type: String,
-    required: true,
-  },
-  password: {
-    type: String,
-    required: true,
-  },
+  email: String,
+  password: String,
 };
 
 const User = new mongoose.model("User", userSchema);
@@ -40,22 +34,40 @@ app.get("/register", function (req, res) {
 });
 
 app.post("/register", function (req, res) {
-  const email = req.body.email;
+  const email = req.body.username;
   const password = req.body.password;
-
+console.log(email, password);
   const newUser = new User({
     email: email,
     password: password,
   });
 
-  newUser.save(function(err) {
+  newUser.save(function (err) {
     if (err) {
-        console.log(err);
+      console.log(err);
     } else {
-        res.render('secrets');
+      res.render("secrets");
     }
   });
+});
 
+app.post("/login", function (req, res) {
+  const username = req.body.username;
+  const password = req.body.password;
+console.log(username, password);
+  User.findOne({ email: username }, function (err, foundUser) {
+    if (err) {
+      console.log(err);
+    } else {
+      if (foundUser) {
+        if (foundUser.password === password) {
+          res.render("secrets");
+        } else {
+          res.send("Password Incorrect");
+        }
+      }
+    }
+  });
 });
 
 app.listen(3000, function () {
