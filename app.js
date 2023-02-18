@@ -54,12 +54,21 @@ app.get("/register", function (req, res) {
   res.render("register");
 });
 
-app.get('/secrets', (req, res) => {
+app.get("/secrets", (req, res) => {
   if (req.isAuthenticated()) {
-    res.render('secrets');
+    res.render("secrets");
   } else {
-    res.redirect('/login');
+    res.redirect("/login");
   }
+});
+
+app.get('/logout', function(req, res, next) {
+  req.logout(function(err) {
+    if (err) {
+      return next(err);
+    }
+    res.redirect('/');
+  })
 })
 
 app.post("/register", function (req, res) {
@@ -79,9 +88,22 @@ app.post("/register", function (req, res) {
   );
 });
 
+app.post("/login", function (req, res) {
+  const user = new User({
+    username: req.body.username,
+    password: req.body.password,
+  });
 
-
-app.post("/login", function (req, res) {});
+  req.login(user, function(err) {
+    if (err) {
+      console.log(err);
+    } else {
+      passport.authenticate('local')(req, res, function () {
+        res.redirect('secrets');
+      })
+    }
+  })
+});
 
 app.listen(3000, function () {
   console.log("Server started on port 3000");
