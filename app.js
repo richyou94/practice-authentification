@@ -24,7 +24,7 @@ app.use(
 );
 
 app.use(passport.initialize());
-app.use(passport.session);
+app.use(passport.session());
 
 mongoose.set("strictQuery", false);
 mongoose.connect("mongodb://localhost:27017/userDB", { useNewUrlParser: true });
