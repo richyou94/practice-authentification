@@ -8,6 +8,7 @@ const mongoose = require("mongoose");
 const session = require("express-session");
 const passport = require("passport");
 const passportLocalMongoose = require("passport-local-mongoose");
+const GoogleStrategy = require("passport-google-oauth20").Strategy;
 
 const app = express();
 
@@ -42,6 +43,22 @@ passport.use(User.createStrategy());
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
+passport.use(
+  new GoogleStrategy(
+    {
+      clientID: process.env.CLIENT_ID,
+      clientSecret: process.env.CLIENT_SECRET,
+      callbackURL: "http://localhost:3000/auth/google/secrets",
+      userProfileURL: "https://www.googleapis.com/oauth2/v3/userinfo",
+    },
+    function (accessToken, refreshToken, profile, cb) {
+      User.findOrCreate({ googleId: profile.id }, function (err, use) {
+        return cb(err, user);
+      });
+    }
+  )
+);
+
 app.get("/", function (req, res) {
   res.render("home");
 });
@@ -62,14 +79,14 @@ app.get("/secrets", (req, res) => {
   }
 });
 
-app.get('/logout', function(req, res, next) {
-  req.logout(function(err) {
+app.get("/logout", function (req, res, next) {
+  req.logout(function (err) {
     if (err) {
       return next(err);
     }
-    res.redirect('/');
-  })
-})
+    res.redirect("/");
+  });
+});
 
 app.post("/register", function (req, res) {
   User.register(
@@ -94,15 +111,15 @@ app.post("/login", function (req, res) {
     password: req.body.password,
   });
 
-  req.login(user, function(err) {
+  req.login(user, function (err) {
     if (err) {
       console.log(err);
     } else {
-      passport.authenticate('local')(req, res, function () {
-        res.redirect('secrets');
-      })
+      passport.authenticate("local")(req, res, function () {
+        res.redirect("secrets");
+      });
     }
-  })
+  });
 });
 
 app.listen(3000, function () {
