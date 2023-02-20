@@ -131,6 +131,15 @@ app.post("/register", function (req, res) {
   );
 });
 
+app.post("/logout", function (req, res, next) {
+  req.logout(function (err) {
+    if (err) {
+      return next(err);
+    }
+    res.redirect("/");
+  });
+});
+
 app.post("/login", function (req, res) {
   const user = new User({
     username: req.body.username,
